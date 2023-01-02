@@ -1,86 +1,95 @@
 import LogoutBtn from "./logoutBtn";
+import { useEffect, useState } from "react";
 
 const HomePage = () => {
-  const apiURL = "https://api.lyrics.ovh";
+  const [search, setSearch] = useState("");
 
   // Search by song or artist
-  async function searchSongs(term) {
-    const res = await fetch(`${apiURL}/suggest/${term}`);
-    const data = await res.json();
-
+  async function searchSongs() {
+    const res = await fetch(`https://api.lyrics.ovh/suggest/${search}`),
+      data = await res.json();
+    console.log(data);
     return data;
   }
 
-  // Get prev and next songs
-  async function getMoreSongs(url) {
-    const res = await fetch(`https://cors-anywhere.herokuapp.com/${url}`);
-    const data = await res.json();
+  // // Get prev and next songs
+  // async function getMoreSongs(url) {
+  //   const res = await fetch(`https://cors-anywhere.herokuapp.com/${url}`);
+  //   const data = await res.json();
 
-    return data;
-  }
+  //   return data;
+  // }
 
-  // Get lyrics for song
-  async function getLyrics(artist, songTitle) {
-    const res = await fetch(`${apiURL}/v1/${artist}/${songTitle}`);
-    const data = await res.json();
+  // // Get lyrics for song
+  // async function getLyrics(artist, songTitle) {
+  //   const res = await fetch(`${apiURL}/v1/${artist}/${songTitle}`);
+  //   const data = await res.json();
 
-    const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, "<br>");
+  //   const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, "<br>");
 
-    result.innerHTML = `<h2><strong>${artist}</strong> - ${songTitle}</h2>
-  <span>${lyrics}</span>`;
+  //   result.innerHTML = `<h2><strong>${artist}</strong> - ${songTitle}</h2>
+  // <span>${lyrics}</span>`;
 
-    more.innerHTML = "";
-  }
+  //   more.innerHTML = "";
+  // }
 
-  // Event listeners
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+  // // Event listeners
+  // form.addEventListener("submit", (e) => {
+  //   e.preventDefault();
 
-    const searchTerm = search.value.trim();
+  //   const searchTerm = search.value.trim();
 
-    if (!searchTerm) {
-      alert("Please type in a search term");
-    } else {
-      searchSongs(searchTerm);
-    }
-  });
+  //   if (!searchTerm) {
+  //     alert("Please type in a search term");
+  //   } else {
+  //     searchSongs(searchTerm);
+  //   }
+  // });
 
-  // Get lyrics button click
-  result.addEventListener("click", (e) => {
-    const clickedEl = e.target;
+  // // Get lyrics button click
+  // result.addEventListener("click", (e) => {
+  //   const clickedEl = e.target;
 
-    if (clickedEl.tagName === "BUTTON") {
-      const artist = clickedEl.getAttribute("data-artist");
-      const songTitle = clickedEl.getAttribute("data-songtitle");
+  //   if (clickedEl.tagName === "BUTTON") {
+  //     const artist = clickedEl.getAttribute("data-artist");
+  //     const songTitle = clickedEl.getAttribute("data-songtitle");
 
-      getLyrics(artist, songTitle);
-    }
-  });
+  //     getLyrics(artist, songTitle);
+  //   }
+  // });
 
   return (
     <>
       <div className="absolute p-4 container flex justify-end items-center mx-auto">
         <LogoutBtn />
       </div>
-      <div class="container h-screen flex flex-col gap-6 justify-center items-center mx-auto py-4 max-w-md">
+      <div className="container h-screen flex flex-col gap-6 justify-center items-center mx-auto py-4 max-w-md">
         <div>
-          <p class="text-center">
+          <p className="text-center">
             Write the name of the song or the artist OR use the microphone icon
           </p>
         </div>
-        <form class="flex gap-4">
+        <form
+          className="flex gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            searchSongs();
+          }}
+        >
           <input
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             name="search"
             id="search"
-            class="px-4 py-2 rounded-lg text-black"
+            className="px-4 py-2 rounded-lg text-black"
           />
-          <div class="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <button type="submit">
-              <i class="fa-solid fa-magnifying-glass text-2xl"></i>
+              <i className="fa-solid fa-magnifying-glass text-2xl"></i>
             </button>
             <button>
-              <i class="fa-solid fa-microphone text-2xl"></i>
+              <i className="fa-solid fa-microphone text-2xl"></i>
             </button>
           </div>
         </form>
