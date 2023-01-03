@@ -6,7 +6,8 @@ const HomePage = () => {
     [resultItems, setResultItems] = useState([]),
     [songLyrics, setSongLyrics] = useState(""),
     [prevLink, setPrevLink] = useState(""),
-    [nextLink, setNextLink] = useState("");
+    [nextLink, setNextLink] = useState(""),
+    [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Search by song or artist
   async function searchSongs() {
