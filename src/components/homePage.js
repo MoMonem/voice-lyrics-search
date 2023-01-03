@@ -2,36 +2,50 @@ import LogoutBtn from "./logoutBtn";
 import { useEffect, useState } from "react";
 
 const HomePage = () => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(""),
+    [resultItems, setResultItems] = useState([]),
+    [songLyrics, setSongLyrics] = useState(""),
+    [prevLink, setPrevLink] = useState(""),
+    [nextLink, setNextLink] = useState("");
 
   // Search by song or artist
   async function searchSongs() {
     const res = await fetch(`https://api.lyrics.ovh/suggest/${search}`),
       data = await res.json();
-    console.log(data);
+
+    if (data.data.length === 0) {
+      alert("No results found");
+    }
+
+    if (data.prev) {
+      setPrevLink(data.prev);
+    }
+
+    if (data.next) {
+      setNextLink(data.next);
+    }
+
+    setResultItems(data.data);
+  }
+
+  // Get prev and next songs
+  async function getMoreSongs(url) {
+    const res = await fetch(`https://cors-anywhere.herokuapp.com/${url}`);
+    const data = await res.json();
     return data;
   }
 
-  // // Get prev and next songs
-  // async function getMoreSongs(url) {
-  //   const res = await fetch(`https://cors-anywhere.herokuapp.com/${url}`);
-  //   const data = await res.json();
+  // Get lyrics for song
+  async function getLyrics(artist, songTitle) {
+    const res = await fetch(
+      `https://api.lyrics.ovh//v1/${artist}/${songTitle}`
+    );
+    const data = await res.json();
 
-  //   return data;
-  // }
+    const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, "<br>");
 
-  // // Get lyrics for song
-  // async function getLyrics(artist, songTitle) {
-  //   const res = await fetch(`${apiURL}/v1/${artist}/${songTitle}`);
-  //   const data = await res.json();
-
-  //   const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, "<br>");
-
-  //   result.innerHTML = `<h2><strong>${artist}</strong> - ${songTitle}</h2>
-  // <span>${lyrics}</span>`;
-
-  //   more.innerHTML = "";
-  // }
+    setSongLyrics(lyrics);
+  }
 
   // // Event listeners
   // form.addEventListener("submit", (e) => {
@@ -63,8 +77,8 @@ const HomePage = () => {
       <div className="absolute p-4 container flex justify-end items-center mx-auto">
         <LogoutBtn />
       </div>
-      <div className="container h-screen flex flex-col gap-6 justify-center items-center mx-auto py-4 max-w-md">
-        <div>
+      <div className="container flex flex-col gap-6 justify-center items-center mx-auto py-4">
+        <div className="mt-40">
           <p className="text-center">
             Write the name of the song or the artist OR use the microphone icon
           </p>
@@ -93,13 +107,71 @@ const HomePage = () => {
             </button>
           </div>
         </form>
-        <div>
-          <ul>
-            <li>Item 1</li>
-            <li>Item 2</li>
-            <li>Item 3</li>
-            <li>Item 4</li>
-          </ul>
+        <div className="mx-auto">
+          {songLyrics ? (
+            <div>
+              <button onClick={() => setSongLyrics("")}>Go Back</button>
+              <h2 className="text-2xl">Lyrics</h2>
+              <p className="text-lg">{songLyrics}</p>
+            </div>
+          ) : (
+            <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {resultItems.map((item) => {
+                return (
+                  <li
+                    key={item.id}
+                    onClick={() => getLyrics(item.artist.name, item.title)}
+                    className="max-w-sm border rounded-lg p-2 hover:border-blue-500 hover:cursor-pointer"
+                  >
+                    <div className="flex gap-4">
+                      <img
+                        src={
+                          item.album
+                            ? item.album.cover
+                            : "https://via.placeholder.com/150"
+                        }
+                        alt={item.title}
+                      />
+                      <div>
+                        <h3 className="text-lg">{item.title}</h3>
+                        <p className="underline">By {item.artist.name}</p>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {resultItems.length > 0 ? (
+            <div className="container mx-auto max-w-sm flex justify-between my-10">
+              <button
+                className="text-white underline"
+                onClick={() => {
+                  getMoreSongs(prevLink).then((data) => {
+                    setResultItems(data.data);
+                    setNextLink(data.next);
+                    setPrevLink(data.prev);
+                  });
+                }}
+              >
+                Prev
+              </button>
+              <button
+                className="text-white underline"
+                onClick={() => {
+                  getMoreSongs(nextLink).then((data) => {
+                    setResultItems(data.data);
+                    setNextLink(data.next);
+                    setPrevLink(data.prev);
+                  });
+                }}
+              >
+                Next
+              </button>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
     </>
