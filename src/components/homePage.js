@@ -15,7 +15,7 @@ const HomePage = () => {
       data = await res.json();
 
     if (data.data.length === 0) {
-      alert("No results found");
+      alert("No results found, try again");
     }
 
     if (data.prev) {
