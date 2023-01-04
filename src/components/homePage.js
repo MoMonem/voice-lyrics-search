@@ -6,8 +6,7 @@ const HomePage = () => {
     [resultItems, setResultItems] = useState([]),
     [songLyrics, setSongLyrics] = useState(""),
     [prevLink, setPrevLink] = useState(""),
-    [nextLink, setNextLink] = useState(""),
-    [isAuthenticated, setIsAuthenticated] = useState(false);
+    [nextLink, setNextLink] = useState("");
 
   // Search by song or artist
   async function searchSongs() {
@@ -37,15 +36,16 @@ const HomePage = () => {
   }
 
   // Get lyrics for song
-  async function getLyrics(artist, songTitle) {
-    const res = await fetch(
-      `https://api.lyrics.ovh//v1/${artist}/${songTitle}`
-    );
-    const data = await res.json();
-
-    const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, "<br>");
-
-    setSongLyrics(lyrics);
+  function getLyrics(artist, songTitle) {
+    fetch(`https://api.lyrics.ovh//v1/${artist}/${songTitle}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, "<br>");
+        setSongLyrics(lyrics);
+      })
+      .catch((err) => {
+        setSongLyrics("No lyrics found");
+      });
   }
 
   // // Event listeners
@@ -80,12 +80,12 @@ const HomePage = () => {
       </div>
       <div className="container flex flex-col gap-6 justify-center items-center mx-auto py-4">
         <div className="mt-40">
-          <p className="text-center">
+          <p className="text-center max-w-sm md:max-w-lg">
             Write the name of the song or the artist OR use the microphone icon
           </p>
         </div>
         <form
-          className="flex gap-4"
+          className="flex gap-4 bg-white rounded-lg p-2"
           onSubmit={(e) => {
             e.preventDefault();
             searchSongs();
@@ -97,23 +97,21 @@ const HomePage = () => {
             onChange={(e) => setSearch(e.target.value)}
             name="search"
             id="search"
-            className="px-4 py-2 rounded-lg text-black"
+            className="text-black"
           />
           <div className="grid grid-cols-2 gap-3">
             <button type="submit">
-              <i className="fa-solid fa-magnifying-glass text-2xl"></i>
+              <i className="fa-solid fa-magnifying-glass text-2xl text-black"></i>
             </button>
             <button>
-              <i className="fa-solid fa-microphone text-2xl"></i>
+              <i className="fa-solid fa-microphone text-2xl text-black"></i>
             </button>
           </div>
         </form>
         <div className="mx-auto">
           {songLyrics ? (
             <div>
-              <button onClick={() => setSongLyrics("")}>Go Back</button>
-              <h2 className="text-2xl">Lyrics</h2>
-              <p className="text-lg">{songLyrics}</p>
+              <p className="text-lg text-red-500">{songLyrics}</p>
             </div>
           ) : (
             <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -144,32 +142,41 @@ const HomePage = () => {
             </ul>
           )}
           {resultItems.length > 0 ? (
-            <div className="container mx-auto max-w-sm flex justify-between my-10">
+            songLyrics ? (
               <button
-                className="text-white underline"
-                onClick={() => {
-                  getMoreSongs(prevLink).then((data) => {
-                    setResultItems(data.data);
-                    setNextLink(data.next);
-                    setPrevLink(data.prev);
-                  });
-                }}
+                className="text-white underline mt-10"
+                onClick={() => setSongLyrics("")}
               >
-                Prev
+                Go Back
               </button>
-              <button
-                className="text-white underline"
-                onClick={() => {
-                  getMoreSongs(nextLink).then((data) => {
-                    setResultItems(data.data);
-                    setNextLink(data.next);
-                    setPrevLink(data.prev);
-                  });
-                }}
-              >
-                Next
-              </button>
-            </div>
+            ) : (
+              <div className="container mx-auto max-w-sm flex justify-between my-10">
+                <button
+                  className="text-white underline"
+                  onClick={() => {
+                    getMoreSongs(prevLink).then((data) => {
+                      setResultItems(data.data);
+                      setNextLink(data.next);
+                      setPrevLink(data.prev);
+                    });
+                  }}
+                >
+                  Prev
+                </button>
+                <button
+                  className="text-white underline"
+                  onClick={() => {
+                    getMoreSongs(nextLink).then((data) => {
+                      setResultItems(data.data);
+                      setNextLink(data.next);
+                      setPrevLink(data.prev);
+                    });
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            )
           ) : (
             <></>
           )}
