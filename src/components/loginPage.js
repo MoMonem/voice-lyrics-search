@@ -1,7 +1,8 @@
-import LoginBtn from "./loginBtn.js";
-import SignupBtn from "./signupBtn.js";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const LoginPage = () => {
+  const { loginWithRedirect, logout } = useAuth0();
+
   return (
     <div
       data-testid="login-page"
@@ -13,8 +14,22 @@ const LoginPage = () => {
         <p>Signup or login to contineu.</p>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <LoginBtn />
-        <SignupBtn />
+        <button
+          className="bg-blue-600 py-2 px-6 font-bold rounded-lg hover:bg-blue-700"
+          onClick={() => loginWithRedirect()}
+        >
+          Login
+        </button>
+        <button
+          className="bg-blue-600 py-2 px-6 font-bold rounded-lg hover:bg-blue-700"
+          onClick={() =>
+            loginWithRedirect({
+              screen_hint: "signup",
+            })
+          }
+        >
+          Signup
+        </button>
       </div>
     </div>
   );

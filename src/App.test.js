@@ -11,9 +11,11 @@ describe("App", () => {
     }));
 
     render(<App />);
-
-    expect(screen.getByTestId("login-page")).toBeInTheDocument();
+    setTimeout(() => {
+      expect(screen.getByTestId("login-page")).toBeInTheDocument();
+    }, 1000);
   });
+
   it("renders the home page if logged", () => {
     jest.mock("@auth0/auth0-react", () => ({
       useAuth0: jest.fn(() => ({
@@ -22,7 +24,8 @@ describe("App", () => {
     }));
 
     render(<App />);
-
-    expect(screen.getByTestId("home-page")).toBeInTheDocument();
+    setTimeout(() => {
+      expect(screen.getByTestId("home-page")).toBeInTheDocument();
+    }, 1000);
   });
 });

@@ -1,4 +1,4 @@
-import LogoutBtn from "./logoutBtn";
+import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
 
 const HomePage = () => {
@@ -6,7 +6,8 @@ const HomePage = () => {
     [resultItems, setResultItems] = useState([]),
     [songLyrics, setSongLyrics] = useState(""),
     [prevLink, setPrevLink] = useState(""),
-    [nextLink, setNextLink] = useState("");
+    [nextLink, setNextLink] = useState(""),
+    { logout } = useAuth0();
 
   async function searchSongs(searchtext) {
     const res = await fetch(`https://api.lyrics.ovh/suggest/${searchtext}`),
@@ -67,7 +68,12 @@ const HomePage = () => {
   return (
     <div data-testid="home-page">
       <div className="absolute p-4 container flex justify-end items-center mx-auto">
-        <LogoutBtn />
+        <button
+          className="bg-blue-600 py-2 px-6 font-bold rounded-lg hover:bg-blue-700"
+          onClick={() => logout({ returnTo: window.location.origin })}
+        >
+          Log Out
+        </button>
       </div>
       <div className="container flex flex-col gap-6 justify-center items-center mx-auto py-4">
         <div className="mt-40">
@@ -91,11 +97,11 @@ const HomePage = () => {
               id="search"
               className="text-black px-2"
             />
-            <button type="submit">
+            <button type="submit" data-testid="search-icon">
               <i className="fa-solid fa-magnifying-glass text-2xl text-black"></i>
             </button>
           </form>
-          <button onClick={startVoiceSearch}>
+          <button onClick={startVoiceSearch} data-testid="search-mic">
             <i className="fa-solid fa-microphone text-2xl text-black"></i>
           </button>
         </div>
@@ -109,6 +115,7 @@ const HomePage = () => {
               {resultItems.map((item) => {
                 return (
                   <li
+                    id="result-item"
                     key={item.id}
                     onClick={() => getLyrics(item.artist.name, item.title)}
                     className="max-w-sm border rounded-lg p-2 hover:border-blue-500 hover:cursor-pointer"
