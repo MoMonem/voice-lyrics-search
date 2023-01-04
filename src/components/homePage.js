@@ -1,5 +1,5 @@
 import LogoutBtn from "./logoutBtn";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const HomePage = () => {
   const [search, setSearch] = useState(""),
@@ -8,9 +8,8 @@ const HomePage = () => {
     [prevLink, setPrevLink] = useState(""),
     [nextLink, setNextLink] = useState("");
 
-  // Search by song or artist
-  async function searchSongs() {
-    const res = await fetch(`https://api.lyrics.ovh/suggest/${search}`),
+  async function searchSongs(searchtext) {
+    const res = await fetch(`https://api.lyrics.ovh/suggest/${searchtext}`),
       data = await res.json();
 
     if (data.data.length === 0) {
@@ -28,14 +27,12 @@ const HomePage = () => {
     setResultItems(data.data);
   }
 
-  // Get prev and next songs
   async function getMoreSongs(url) {
     const res = await fetch(`https://cors-anywhere.herokuapp.com/${url}`);
     const data = await res.json();
     return data;
   }
 
-  // Get lyrics for song
   function getLyrics(artist, songTitle) {
     fetch(`https://api.lyrics.ovh//v1/${artist}/${songTitle}`)
       .then((res) => res.json())
@@ -44,34 +41,28 @@ const HomePage = () => {
         setSongLyrics(lyrics);
       })
       .catch((err) => {
-        setSongLyrics("No lyrics found");
+        setSongLyrics("No lyrics found in our the database");
       });
   }
 
-  // // Event listeners
-  // form.addEventListener("submit", (e) => {
-  //   e.preventDefault();
+  // Speech recognition
+  function startVoiceSearch() {
+    window.SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = new window.SpeechRecognition();
 
-  //   const searchTerm = search.value.trim();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
 
-  //   if (!searchTerm) {
-  //     alert("Please type in a search term");
-  //   } else {
-  //     searchSongs(searchTerm);
-  //   }
-  // });
+    recognition.start();
 
-  // // Get lyrics button click
-  // result.addEventListener("click", (e) => {
-  //   const clickedEl = e.target;
-
-  //   if (clickedEl.tagName === "BUTTON") {
-  //     const artist = clickedEl.getAttribute("data-artist");
-  //     const songTitle = clickedEl.getAttribute("data-songtitle");
-
-  //     getLyrics(artist, songTitle);
-  //   }
-  // });
+    recognition.onresult = function (e) {
+      recognition.stop();
+      searchSongs(e.results[0][0].transcript);
+      setSearch(e.results[0][0].transcript);
+    };
+  }
 
   return (
     <>
@@ -84,31 +75,31 @@ const HomePage = () => {
             Write the name of the song or the artist OR use the microphone icon
           </p>
         </div>
-        <form
-          className="flex gap-4 bg-white rounded-lg p-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            searchSongs();
-          }}
-        >
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            name="search"
-            id="search"
-            className="text-black"
-          />
-          <div className="grid grid-cols-2 gap-3">
+        <div className="flex gap-4 bg-white rounded-lg p-2">
+          <form
+            className="flex gap-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              searchSongs(e.target.search.value);
+            }}
+          >
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              name="search"
+              id="search"
+              className="text-black px-2"
+            />
             <button type="submit">
               <i className="fa-solid fa-magnifying-glass text-2xl text-black"></i>
             </button>
-            <button>
-              <i className="fa-solid fa-microphone text-2xl text-black"></i>
-            </button>
-          </div>
-        </form>
-        <div className="mx-auto">
+          </form>
+          <button onClick={startVoiceSearch}>
+            <i className="fa-solid fa-microphone text-2xl text-black"></i>
+          </button>
+        </div>
+        <div className="mx-auto text-center">
           {songLyrics ? (
             <div>
               <p className="text-lg text-red-500">{songLyrics}</p>
