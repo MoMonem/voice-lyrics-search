@@ -65,7 +65,7 @@ const HomePage = () => {
   }
 
   return (
-    <>
+    <div data-testid="home-page">
       <div className="absolute p-4 container flex justify-end items-center mx-auto">
         <LogoutBtn />
       </div>
@@ -173,7 +173,7 @@ const HomePage = () => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
